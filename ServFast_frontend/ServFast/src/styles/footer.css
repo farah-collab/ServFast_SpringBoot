@@ -1,0 +1,55 @@
+.footer {
+  background: #fff5f5;
+  padding: 48px 60px 0;
+  border-top: 1px solid #f0dede;
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 40px;
+}
+
+.footer__brand-logo {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #C0001B;
+  margin-bottom: 12px;
+}
+
+.footer__brand-desc {
+  color: #999;
+  font-size: 13px;
+  line-height: 1.75;
+  max-width: 240px;
+}
+
+.footer__col-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111;
+  margin-bottom: 14px;
+}
+
+.footer__col a {
+  display: block;
+  color: #999;
+  font-size: 13px;
+  margin-bottom: 9px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer__col a:hover {
+  color: #C0001B;
+}
+
+.footer__bottom {
+  border-top: 1px solid #f0dede;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 12px;
+  color: #bbb;
+}

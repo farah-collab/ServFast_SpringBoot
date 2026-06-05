@@ -1,0 +1,6 @@
+{
+  "name": "ServiceHub",
+  "description": "A premium service marketplace connecting elite professionals with enterprise solutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["auth", "api-integration"]
+}
