@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/common/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import { useEffect, useState } from "react";
-import Navbar from "../components/common/Navbar";
 import { enterpriseApi, Enterprise } from "../api/EnterpriseAPI";
 
 const FEATURES = [
@@ -157,10 +157,7 @@ export default function EnterprisePage() {
     <div style={{ background: bg, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: text }}>
       <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-
-      <Navbar />
-
-      {/* ── HERO ── */}
+      <Navbar />      {/* ── HERO ── */}
       <section style={{ padding: "96px 64px 80px", textAlign: "center", background: dm ? "linear-gradient(135deg,#111827 0%,#1a0a0a 100%)" : "linear-gradient(135deg,#fff 0%,#FEF2F2 100%)", borderBottom: `1px solid ${border}` }}>
         <span style={{ display: "inline-block", padding: "4px 14px", borderRadius: 9999, background: dm ? "#450A0A" : "#FEF2F2", color: redL, fontSize: 13, fontWeight: 700, marginBottom: 20, letterSpacing: "0.04em" }}>
           ENTERPRISE SOLUTIONS

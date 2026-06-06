@@ -2,20 +2,27 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { authApi } from "../../api/auth";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { useUser } from "../../context/UserContext";
 import { notificationsApi, Notification } from "../../api/notifications";
+
+const STORAGE_URL = 'http://localhost:8081';
+
+function getImageUrl(photoUrl: string | null | undefined): string | null {
+  if (!photoUrl) return null;
+  if (photoUrl.startsWith('http') || photoUrl.startsWith('data:')) return photoUrl;
+  const normalizedPath = photoUrl.startsWith('/') ? photoUrl : `/${photoUrl}`;
+  return `${STORAGE_URL}${normalizedPath}`;
+}
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = authApi.getCurrentUser();
+  const { user } = useUser();
   const { darkMode, toggleDarkMode } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -54,14 +61,6 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
-
   const getInitials = () => {
     if (!user) return "?";
     return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
@@ -91,12 +90,6 @@ export default function Navbar() {
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
         .nav-link-item { transition: color 0.2s, transform 0.15s; }
         .nav-link-item:hover { transform: translateY(-1px); }
-        .nav-search-bar {
-          transition: box-shadow 0.2s, border-color 0.2s, width 0.3s;
-        }
-        .nav-search-bar.focused {
-          box-shadow: 0 0 0 3px rgba(185,28,28,0.15);
-        }
         .nav-btn-icon {
           transition: background 0.2s, transform 0.15s;
         }
@@ -189,78 +182,7 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* ── Search Bar (centre) ── */}
-          <form
-            onSubmit={handleSearch}
-            style={{ flex: 1, maxWidth: 380, minWidth: 0 }}
-          >
-            <div
-              className={`nav-search-bar${searchFocused ? " focused" : ""}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                border: searchFocused
-                  ? "1.5px solid #B91C1C"
-                  : dm ? "1.5px solid #374151" : "1.5px solid #E5E7EB",
-                borderRadius: 12,
-                background: dm ? "#1F2937" : "#F9FAFB",
-                overflow: "hidden",
-                height: 40,
-              }}
-            >
-              <span style={{
-                paddingLeft: 12,
-                paddingRight: 6,
-                color: dm ? "#6B7280" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                flexShrink: 0,
-              }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-              </span>
-              <input
-                ref={searchRef}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                placeholder="Search services, experts..."
-                style={{
-                  flex: 1,
-                  border: "none",
-                  outline: "none",
-                  background: "transparent",
-                  fontSize: 13,
-                  color: dm ? "#F3F4F6" : "#111827",
-                  padding: "0 8px 0 0",
-                  minWidth: 0,
-                }}
-              />
-              {searchQuery && (
-                <button
-                  type="submit"
-                  style={{
-                    height: "100%",
-                    padding: "0 14px",
-                    background: "#B91C1C",
-                    border: "none",
-                    color: "#fff",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    transition: "background 0.2s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#991B1B"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#B91C1C"}
-                >
-                  Go
-                </button>
-              )}
-            </div>
-          </form>
+          <div style={{ flex: 1 }} />
 
           {/* ── Right Side ── */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
@@ -408,13 +330,17 @@ export default function Navbar() {
                   }}
                   title="Your profile"
                 >
-                  {user.avatarUrl || user.profilePhoto ? (
-                    <img
-                      src={user.avatarUrl || user.profilePhoto}
-                      alt="Profile"
-                      style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover" }}
-                    />
-                  ) : getInitials()}
+                  {(() => {
+                    const photoUrl = getImageUrl(user.profilePhoto || user.avatarUrl);
+                    return photoUrl ? (
+                      <img
+                        src={photoUrl}
+                        alt="Profile"
+                        style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover" }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    ) : getInitials();
+                  })()}
                 </button>
 
                 {showProfileMenu && (

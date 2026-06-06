@@ -24,6 +24,7 @@ public class ServiceService {
     private static final double BAD_RATING_THRESHOLD = 0.6;
     private static final long MIN_RATINGS_FOR_CHECK = 5;
  
+    @Transactional
     public ServiceResponseDTO create(Long userId, ServiceCreateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
@@ -93,6 +94,7 @@ public class ServiceService {
         serviceRepository.delete(service);
     }
  
+    @Transactional
     public ServiceResponseDTO updateService(Long serviceId, Long userId, ServiceCreateRequest request) {
         com.app.servicefinder.model.Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new RuntimeException("Service non trouvé"));

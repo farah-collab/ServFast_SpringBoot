@@ -70,26 +70,40 @@ public class RatingService {
         return ratingRepository
             .findByCommentIsNotNullOrderByCreatedAtDesc(PageRequest.of(0, limit))
             .stream()
-            .map(r -> RatingResponseDTO.builder()
-                .id(r.getId())
-                .serviceId(r.getService().getId())
-                .userId(r.getUser().getId())
-                .userName(r.getUser().getFirstName() + " " + r.getUser().getLastName())
-                .userPhoto(r.getUser().getProfilePhoto())
-                .score(r.getScore())
-                .comment(r.getComment())
-                .createdAt(r.getCreatedAt())
-                .updatedAt(r.getUpdatedAt())
-                .build())
+            .map(r -> {
+                String firstName = r.getUser().getFirstName() != null ? r.getUser().getFirstName() : "";
+                String lastName = r.getUser().getLastName() != null ? r.getUser().getLastName() : "";
+                String userName = (firstName.trim() + " " + lastName.trim()).trim();
+                if (userName.isEmpty()) {
+                    userName = "User " + r.getUser().getId();
+                }
+                return RatingResponseDTO.builder()
+                    .id(r.getId())
+                    .serviceId(r.getService().getId())
+                    .userId(r.getUser().getId())
+                    .userName(userName)
+                    .userPhoto(r.getUser().getProfilePhoto())
+                    .score(r.getScore())
+                    .comment(r.getComment())
+                    .createdAt(r.getCreatedAt())
+                    .updatedAt(r.getUpdatedAt())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
     private RatingResponseDTO toDTO(Rating r) {
+        String firstName = r.getUser().getFirstName() != null ? r.getUser().getFirstName() : "";
+        String lastName = r.getUser().getLastName() != null ? r.getUser().getLastName() : "";
+        String userName = (firstName.trim() + " " + lastName.trim()).trim();
+        if (userName.isEmpty()) {
+            userName = "User " + r.getUser().getId();
+        }
         return RatingResponseDTO.builder()
             .id(r.getId())
             .serviceId(r.getService().getId())
             .userId(r.getUser().getId())
-            .userName(r.getUser().getFirstName() + " " + r.getUser().getLastName())
+            .userName(userName)
             .userPhoto(r.getUser().getProfilePhoto())
             .score(r.getScore())
             .comment(r.getComment())
@@ -97,4 +111,4 @@ public class RatingService {
             .updatedAt(r.getUpdatedAt())
             .build();
     }
-}
+}

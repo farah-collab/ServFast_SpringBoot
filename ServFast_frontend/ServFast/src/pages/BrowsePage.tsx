@@ -6,6 +6,14 @@ import { servicesApi, Service } from "../api/services";
 import { usersApi, UserProfile } from "../api/users";
 import { categoriesApi, Category } from "../api/categories";
 
+const STORAGE_URL = 'http://localhost:8081';
+function getImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const normalized = url.startsWith('/') ? url : `/${url}`;
+  return `${STORAGE_URL}${normalized}`;
+}
+
 type Tab = "services" | "experts";
 type SortOption = "relevant" | "price_asc" | "price_desc" | "rating";
 
@@ -37,6 +45,13 @@ export default function BrowsePage() {
   const dm_input  = dm ? "#1F2937" : "#ffffff";
 
   useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      const catId = Number(categoryParam);
+      if (!isNaN(catId)) {
+        setSelectedCategory(catId);
+      }
+    }
     categoriesApi.getAll()
       .then(data => setCategories(Array.isArray(data) ? data : (data as any).content ?? []))
       .catch(() => setCategories([]));
@@ -355,7 +370,10 @@ export default function BrowsePage() {
                   >
                     <div style={{ height: 155, overflow: "hidden", background: dm ? "#374151" : "#F3F4F6" }}>
                       <img
-                        src={s.photoUrls?.[0] ?? s.imageUrl ?? `https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80`}
+                        src={
+                          getImageUrl(s.photoUrls?.[0] ?? s.imageUrl ?? null) ??
+                          "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80"
+                        }
                         alt={s.title}
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         onError={e => { e.currentTarget.src = "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80"; }}
@@ -432,7 +450,7 @@ export default function BrowsePage() {
                       border: `3px solid ${dm ? "#374151" : "#FEF2F2"}`,
                     }}>
                       {expert.profilePhoto
-                        ? <img src={expert.profilePhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ? <img src={getImageUrl(expert.profilePhoto) ?? ''} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         : `${expert.firstName?.[0] || ""}${expert.lastName?.[0] || ""}`}
                     </div>
 

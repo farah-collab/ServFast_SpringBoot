@@ -23,6 +23,12 @@ public class CategoryController {
     // POST /api/categories  (admin only - à sécuriser plus tard)
     @PostMapping
     public ResponseEntity<Category> create(@RequestBody Category category) {
+        if (category.getName() != null) {
+            java.util.Optional<Category> existing = categoryRepository.findByNameIgnoreCase(category.getName().trim());
+            if (existing.isPresent()) {
+                return ResponseEntity.ok(existing.get());
+            }
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryRepository.save(category));
     }
 }

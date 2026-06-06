@@ -21,5 +21,6 @@ public class Category {
     private String color;  
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Service> services;
 }

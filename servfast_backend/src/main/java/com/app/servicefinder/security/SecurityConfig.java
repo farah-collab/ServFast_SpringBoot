@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/api/health").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/upload/**").permitAll() // Allow uploading (with/without JWT for flexibility)
+                .requestMatchers("/api/upload", "/api/upload/**").permitAll() // Allow uploading (with/without JWT for flexibility)
                 .requestMatchers("/api/services/search").permitAll()
                 .requestMatchers("/api/services/{id}").permitAll()
                 .requestMatchers("/api/services/user/**").permitAll()

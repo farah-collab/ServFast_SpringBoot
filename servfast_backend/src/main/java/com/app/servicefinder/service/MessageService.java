@@ -79,9 +79,15 @@ public class MessageService {
             User partner = conv.getUser1().getId().equals(userId) ? conv.getUser2() : conv.getUser1();
             Long unread = messageRepository.countBySender_IdAndReceiver_IdAndIsReadFalse(
                 partner.getId(), userId);
+            String firstName = partner.getFirstName() != null ? partner.getFirstName() : "";
+            String lastName = partner.getLastName() != null ? partner.getLastName() : "";
+            String participantName = (firstName.trim() + " " + lastName.trim()).trim();
+            if (participantName.isEmpty()) {
+                participantName = "User " + partner.getId();
+            }
             return ConversationDTO.builder()
                 .participantId(partner.getId())
-                .participantName(partner.getFirstName() + " " + partner.getLastName())
+                .participantName(participantName)
                 .participantPhoto(partner.getProfilePhoto())
                 .lastMessage(conv.getLastMessage() != null ? conv.getLastMessage() : "")
                 .lastMessageAt(conv.getLastMessageAt())
@@ -91,13 +97,27 @@ public class MessageService {
     }
 
     private MessageResponseDTO toDTO(Message m) {
+        String senderFirstName = m.getSender().getFirstName() != null ? m.getSender().getFirstName() : "";
+        String senderLastName = m.getSender().getLastName() != null ? m.getSender().getLastName() : "";
+        String senderName = (senderFirstName.trim() + " " + senderLastName.trim()).trim();
+        if (senderName.isEmpty()) {
+            senderName = "User " + m.getSender().getId();
+        }
+        
+        String receiverFirstName = m.getReceiver().getFirstName() != null ? m.getReceiver().getFirstName() : "";
+        String receiverLastName = m.getReceiver().getLastName() != null ? m.getReceiver().getLastName() : "";
+        String receiverName = (receiverFirstName.trim() + " " + receiverLastName.trim()).trim();
+        if (receiverName.isEmpty()) {
+            receiverName = "User " + m.getReceiver().getId();
+        }
+        
         return MessageResponseDTO.builder()
             .id(m.getId())
             .senderId(m.getSender().getId())
-            .senderName(m.getSender().getFirstName() + " " + m.getSender().getLastName())
+            .senderName(senderName)
             .senderPhoto(m.getSender().getProfilePhoto())
             .receiverId(m.getReceiver().getId())
-            .receiverName(m.getReceiver().getFirstName() + " " + m.getReceiver().getLastName())
+            .receiverName(receiverName)
             .content(m.getContent())
             .isRead(m.getIsRead())
             .sentAt(m.getSentAt())

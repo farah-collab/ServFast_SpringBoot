@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth";
+import { useTheme } from "../context/ThemeContext";
 
 export function ForgotPasswordView() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export function ForgotPasswordView() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const { darkMode: dm } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +31,7 @@ export function ForgotPasswordView() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className={`min-h-screen transition-colors duration-200 flex items-center justify-center px-6 ${dm ? 'bg-gray-950 text-white' : 'bg-white text-gray-900'}`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <link
         href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet"
@@ -39,34 +41,34 @@ export function ForgotPasswordView() {
         {/* Back button */}
         <button
           onClick={() => navigate('/login')}
-          className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 mb-8 bg-transparent border-none cursor-pointer p-0 transition-colors"
+          className={`flex items-center gap-2 text-sm mb-8 bg-transparent border-none cursor-pointer p-0 transition-colors ${dm ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
         >
           ← Back to sign in
         </button>
 
         {/* Icon */}
-        <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-2xl ${dm ? 'bg-red-950/40 border border-red-900/50' : 'bg-red-50'}`}>
           🔐
         </div>
 
         {sent ? (
           /* Success state */
           <div>
-            <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-2xl ${dm ? 'bg-green-950/40 border border-green-900/50' : 'bg-green-50'}`}>
               ✅
             </div>
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-3" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className={`text-3xl font-extrabold mb-3 ${dm ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Sora', sans-serif" }}>
               Check your email
             </h1>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-              We've sent a password reset link to <span className="font-semibold text-gray-700">{email}</span>. 
+              We've sent a password reset link to <span className={`font-semibold ${dm ? 'text-gray-200' : 'text-gray-700'}`}>{email}</span>. 
               Check your inbox and follow the instructions.
             </p>
             <p className="text-xs text-gray-400 mb-8">
               Didn't receive it? Check spam, or{" "}
               <button
                 onClick={() => setSent(false)}
-                className="text-red-700 font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
+                className={`font-semibold hover:underline bg-transparent border-none cursor-pointer p-0 ${dm ? 'text-red-400 hover:text-red-300' : 'text-red-700 hover:text-red-800'}`}
               >
                 try again
               </button>.
@@ -74,7 +76,7 @@ export function ForgotPasswordView() {
             <button
               onClick={() => navigate('/login')}
               className="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5"
-              style={{ boxShadow: "0 4px 14px rgba(192,0,27,0.35)" }}
+              style={{ boxShadow: dm ? "0 4px 14px rgba(192,0,27,0.2)" : "0 4px 14px rgba(192,0,27,0.35)" }}
             >
               Back to sign in
             </button>
@@ -82,7 +84,7 @@ export function ForgotPasswordView() {
         ) : (
           /* Form state */
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-3" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className={`text-3xl font-extrabold mb-3 ${dm ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Sora', sans-serif" }}>
               Forgot your password?
             </h1>
             <p className="text-gray-400 text-sm mb-8 leading-relaxed">
@@ -90,21 +92,21 @@ export function ForgotPasswordView() {
             </p>
 
             {error && (
-              <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-center gap-2">
+              <div className={`mb-5 px-4 py-3 border rounded-xl text-sm font-medium flex items-center gap-2 ${dm ? 'bg-red-950/30 border-red-900/50 text-red-400' : 'bg-red-50 border-red-200 text-red-700'}`}>
                 <span>⚠️</span> {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email address</label>
+                <label className={`block text-sm font-semibold mb-2 ${dm ? 'text-gray-300' : 'text-gray-700'}`}>Email address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm outline-none transition-all focus:border-red-700 focus:bg-red-50 bg-gray-50 placeholder-gray-300"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-sm outline-none transition-all ${dm ? 'border-gray-800 bg-gray-900 text-white placeholder-gray-600 focus:border-red-600 focus:bg-gray-850' : 'border-gray-100 bg-gray-50 text-gray-900 placeholder-gray-300 focus:border-red-700 focus:bg-red-50'}`}
                 />
               </div>
 
@@ -112,7 +114,7 @@ export function ForgotPasswordView() {
                 type="submit"
                 disabled={loading}
                 className="w-full bg-red-700 hover:bg-red-800 disabled:bg-red-400 text-white font-bold py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:translate-y-0 flex items-center justify-center gap-2"
-                style={{ boxShadow: "0 4px 14px rgba(192,0,27,0.35)" }}
+                style={{ boxShadow: dm ? "0 4px 14px rgba(192,0,27,0.2)" : "0 4px 14px rgba(192,0,27,0.35)" }}
               >
                 {loading ? (
                   <>

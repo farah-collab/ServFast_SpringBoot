@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authApi } from "../api/auth";
+import { useTheme } from "../context/ThemeContext";
 
 export function LoginView() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode: dm } = useTheme();
   const redirectFrom = (location.state as { from?: { pathname?: string } })?.from?.pathname;
   const isExpired = new URLSearchParams(location.search).get('expired') === 'true';
   const [email, setEmail] = useState("");
@@ -36,7 +38,7 @@ export function LoginView() {
 
   return (
     <div
-      className="min-h-screen bg-white flex"
+      className={`min-h-screen flex transition-colors duration-300 ${dm ? 'bg-gray-950 text-white' : 'bg-white text-gray-900'}`}
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       <link
@@ -96,9 +98,8 @@ export function LoginView() {
           </div>
         </div>
       </div>
-
       {/* ── RIGHT PANEL ── */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
+      <div className={`flex-1 flex items-center justify-center px-8 py-12 transition-colors duration-300 ${dm ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="w-full max-w-md">
 
           <div className="lg:hidden mb-8 text-center">
@@ -108,7 +109,7 @@ export function LoginView() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-2" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className={`text-3xl font-extrabold mb-2 ${dm ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Sora', sans-serif" }}>
               Welcome back
             </h1>
             <p className="text-gray-400 text-sm">Sign in to your account to continue</p>
@@ -134,21 +135,23 @@ export function LoginView() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email address</label>
+              <label className={`block text-sm font-semibold mb-2 ${dm ? 'text-gray-300' : 'text-gray-700'}`}>Email address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm outline-none transition-all duration-200 focus:border-red-700 focus:bg-red-50 bg-gray-50 placeholder-gray-300"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-sm outline-none transition-all duration-200 focus:border-red-700 focus:bg-transparent ${
+                  dm ? 'border-gray-800 bg-gray-800 text-white placeholder-gray-500' : 'border-gray-100 bg-gray-50 text-gray-900 placeholder-gray-300'
+                }`}
               />
             </div>
 
             {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-semibold text-gray-700">Password</label>
+                <label className={`text-sm font-semibold ${dm ? 'text-gray-300' : 'text-gray-700'}`}>Password</label>
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
@@ -164,12 +167,14 @@ export function LoginView() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm outline-none transition-all duration-200 focus:border-red-700 focus:bg-red-50 bg-gray-50 placeholder-gray-300 pr-12"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-sm outline-none transition-all duration-200 focus:border-red-700 pr-12 focus:bg-transparent ${
+                    dm ? 'border-gray-800 bg-gray-800 text-white placeholder-gray-500' : 'border-gray-100 bg-gray-50 text-gray-900 placeholder-gray-300'
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm font-medium bg-transparent border-none cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-650 text-sm font-medium bg-transparent border-none cursor-pointer"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -179,7 +184,7 @@ export function LoginView() {
             {/* Remember me */}
             <div className="flex items-center gap-2">
               <input type="checkbox" id="remember" className="w-4 h-4 accent-red-700 cursor-pointer" />
-              <label htmlFor="remember" className="text-sm text-gray-500 cursor-pointer">Remember me for 30 days</label>
+              <label htmlFor="remember" className={`text-sm cursor-pointer ${dm ? 'text-gray-400' : 'text-gray-550'}`}>Remember me for 30 days</label>
             </div>
 
             {/* Submit */}

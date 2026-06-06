@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ratingsApi, Rating } from "../../api/ratings";
 
+const STORAGE_URL = 'http://localhost:8081';
+function getImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const normalized = url.startsWith('/') ? url : `/${url}`;
+  return `${STORAGE_URL}${normalized}`;
+}
+
 export default function TestimonialBanner() {
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState<Rating[]>([]);
@@ -69,11 +77,12 @@ export default function TestimonialBanner() {
                 "{currentTestimonial.comment}"
               </p>
               <div className="flex items-center gap-3">
-                {currentTestimonial.userPhoto ? (
+                  {currentTestimonial.userPhoto ? (
                   <img
-                    src={currentTestimonial.userPhoto}
+                    src={getImageUrl(currentTestimonial.userPhoto) ?? currentTestimonial.userPhoto}
                     alt={currentTestimonial.userName}
                     className="w-11 h-11 rounded-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                 ) : (
                   <div className="w-11 h-11 rounded-full bg-red-700 flex items-center justify-center font-extrabold text-base shrink-0">

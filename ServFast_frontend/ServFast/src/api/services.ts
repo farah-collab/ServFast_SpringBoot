@@ -34,6 +34,7 @@ export interface ServiceCreateRequest {
   categoryId: number;
   isAvailable?: boolean;
   imageUrl?: string;
+  photoUrls?: string[];
 }
 
 export const servicesApi = {
@@ -79,5 +80,23 @@ export const servicesApi = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/services/${id}`);
+  },
+
+  getSaved: async (): Promise<Service[]> => {
+    const res = await api.get('/saved');
+    return res.data;
+  },
+
+  save: async (serviceId: number): Promise<void> => {
+    await api.post(`/saved/${serviceId}`);
+  },
+
+  unsave: async (serviceId: number): Promise<void> => {
+    await api.delete(`/saved/${serviceId}`);
+  },
+
+  isSaved: async (serviceId: number): Promise<boolean> => {
+    const res = await api.get(`/saved/${serviceId}/check`);
+    return res.data.saved;
   },
 };

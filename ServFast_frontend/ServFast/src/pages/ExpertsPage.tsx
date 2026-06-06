@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/common/Footer";
 import { useTheme } from "../context/ThemeContext";
 import { servicesApi, Service } from "../api/services";
+
+const STORAGE_URL = 'http://localhost:8081';
+
+function getImageUrl(photoUrl: string | null | undefined): string | null {
+  if (!photoUrl) return null;
+  if (photoUrl.startsWith('http') || photoUrl.startsWith('data:')) return photoUrl;
+  const normalizedPath = photoUrl.startsWith('/') ? photoUrl : `/${photoUrl}`;
+  return `${STORAGE_URL}${normalizedPath}`;
+}
 
 export default function ExpertsPage() {
   const navigate = useNavigate();
@@ -40,6 +49,7 @@ export default function ExpertsPage() {
         name: provider.fullName,
         city: provider.city,
         photo: provider.profilePhoto,
+        photoUrl: getImageUrl(provider.profilePhoto),
         serviceCount: 0,
         topService: service,
       };
@@ -86,11 +96,18 @@ export default function ExpertsPage() {
               >
                 <div className="p-6">
                   <div className="flex items-center gap-4 mb-5">
-                    <img
-                      src={expert.photo ?? "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=120&q=80"}
-                      alt={expert.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-red-700 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+                      {(expert as any).photoUrl ? (
+                        <img
+                          src={(expert as any).photoUrl}
+                          alt={expert.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      ) : (
+                        expert.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
+                      )}
+                    </div>
                     <div>
                       <h2 className={`text-xl font-bold ${text}`}>{expert.name}</h2>
                       <p className={`text-sm ${subtext}`}>{expert.city ?? "Remote"}</p>
@@ -104,7 +121,10 @@ export default function ExpertsPage() {
                   {expert.topService && (
                     <div className="rounded-3xl overflow-hidden border border-gray-200 bg-gray-50 dark:bg-gray-950 dark:border-gray-800">
                       <img
-                        src={expert.topService.photoUrls?.[0] ?? expert.topService.imageUrl ?? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&q=80"}
+                        src={
+                          getImageUrl(expert.topService.photoUrls?.[0] ?? expert.topService.imageUrl ?? null) ??
+                          "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&q=80"
+                        }
                         alt={expert.topService.title}
                         className="w-full h-40 object-cover"
                       />

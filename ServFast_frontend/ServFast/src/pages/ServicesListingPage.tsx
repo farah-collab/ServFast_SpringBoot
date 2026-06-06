@@ -1,6 +1,6 @@
-import { useState, useEffect, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "../components/common/Navbar";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/common/Footer";
 import { useTheme } from "../context/ThemeContext";
 import { servicesApi, Service } from "../api/services";
@@ -13,7 +13,6 @@ export default function ServicesListingPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
   const dm_bg = dm ? "#111827" : "#ffffff";
@@ -41,14 +40,7 @@ export default function ServicesListingPage() {
     load();
   }, []);
 
-  const handleSearch = (e: FormEvent) => {
-    e.preventDefault();
-    if (searchInput.trim()) {
-      navigate(`/browse?q=${encodeURIComponent(searchInput.trim())}`);
-    } else {
-      navigate("/browse");
-    }
-  };
+  // Search handler removed
 
   const handleCategoryClick = (catId: number) => {
     setActiveCategory(catId === activeCategory ? null : catId);
@@ -85,9 +77,7 @@ export default function ServicesListingPage() {
       `}</style>
 
       <div style={{ minHeight: "100vh", background: dm_bg, fontFamily: "'DM Sans', sans-serif" }}>
-        <Navbar />
-
-        <section style={{
+        <Navbar />        <section style={{
           background: dm
             ? "linear-gradient(135deg, #1a0505 0%, #111827 60%)"
             : "linear-gradient(135deg, #fff5f5 0%, #fff 60%)",
@@ -123,47 +113,7 @@ export default function ServicesListingPage() {
               From concept to delivery.
             </p>
 
-            <form onSubmit={handleSearch}>
-              <div className="hero-search" style={{
-                display: "flex", maxWidth: 600, margin: "0 auto",
-                border: `2px solid ${dm ? "#374151" : "#E5E7EB"}`,
-                borderRadius: 16, overflow: "hidden",
-                background: dm ? "#1F2937" : "#fff",
-                transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#B91C1C")}
-              onBlur={e => (e.currentTarget.style.borderColor = dm ? "#374151" : "#E5E7EB")}
-              >
-                <span style={{ display: "flex", alignItems: "center", paddingLeft: 18, color: dm_sub }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  </svg>
-                </span>
-                <input
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  placeholder="Ex: web developer, logo design, plumber..."
-                  style={{
-                    flex: 1, border: "none", outline: "none",
-                    padding: "16px 14px", fontSize: 15,
-                    background: "transparent", color: dm_text,
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
-                />
-                <button type="submit" style={{
-                  padding: "0 28px", background: "#B91C1C",
-                  border: "none", color: "#fff",
-                  fontWeight: 700, fontSize: 15, cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "#991B1B"}
-                onMouseLeave={e => e.currentTarget.style.background = "#B91C1C"}
-                >
-                  Search
-                </button>
-              </div>
-            </form>
+            {/* Search bar removed */}
 
             <div style={{ marginTop: 18, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
               <span style={{ fontSize: 13, color: dm_sub }}>Popular:</span>
@@ -243,7 +193,7 @@ export default function ServicesListingPage() {
                   className="cat-chip"
                   onClick={() => handleCategoryClick(cat.id)}
                   style={{
-                    padding: "18px 12px", borderRadius: 14, border: "none",
+                    padding: "18px 12px", borderRadius: 14,
                     background: activeCategory === cat.id
                       ? "#B91C1C"
                       : dm ? "#1F2937" : "#F9FAFB",

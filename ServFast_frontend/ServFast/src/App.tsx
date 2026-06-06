@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { UserProvider } from './context/UserContext';
 import { LoginView } from './components/LoginView';
 import { RegisterView } from './components/RegisterView';
 import { ForgotPasswordView } from './components/ForgotPasswordView';
@@ -33,6 +34,7 @@ const ProviderRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 function App() {
   return (
     <ThemeProvider>
+      <UserProvider>
       <Routes>
         {/* ── Public routes ── */}
         <Route path="/login"           element={<LoginView />} />
@@ -47,7 +49,7 @@ function App() {
         {/* ── Protected routes ── */}
         <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+        <Route path="/dashboard" element={<ProviderRoute><ProviderDashboard /></ProviderRoute>} />
         <Route path="/messages"  element={<ProtectedRoute><MessagingPage /></ProtectedRoute>} />
         <Route path="/messages/:partnerId" element={<ProtectedRoute><MessagingPage /></ProtectedRoute>} />
 
@@ -58,6 +60,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </UserProvider>
     </ThemeProvider>
   );
 }
