@@ -3,16 +3,16 @@ import { authApi, AuthUser } from '../api/auth';
 
 interface UserContextType {
   user: AuthUser | null;
-  /** Call this after any profile update to propagate changes app-wide */
   refreshUser: () => void;
-  /** Update specific fields in the stored user and re-render all consumers */
   updateUser: (partial: Partial<AuthUser>) => void;
+  logout: () => void;
 }
 
 const UserContext = createContext<UserContextType>({
   user: null,
   refreshUser: () => {},
   updateUser: () => {},
+  logout: () => {},
 });
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -27,8 +27,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(authApi.getCurrentUser());
   }, []);
 
+  const logout = useCallback(() => {
+    authApi.logout();
+    setUser(null);
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, refreshUser, updateUser }}>
+    <UserContext.Provider value={{ user, refreshUser, updateUser, logout }}>
       {children}
     </UserContext.Provider>
   );

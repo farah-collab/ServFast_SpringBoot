@@ -1,6 +1,5 @@
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { authApi } from "../../api/auth";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useUser } from "../../context/UserContext";
 import { notificationsApi, Notification } from "../../api/notifications";
@@ -17,7 +16,7 @@ function getImageUrl(photoUrl: string | null | undefined): string | null {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const { darkMode, toggleDarkMode } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
@@ -25,7 +24,11 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
     const loadNotifications = async () => {
       try {
         const list = await notificationsApi.getAll();
@@ -57,7 +60,7 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    authApi.logout();
+    logout();        // ← reset user à null dans le context + efface localStorage
     navigate("/login");
   };
 
@@ -90,20 +93,14 @@ export default function Navbar() {
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
         .nav-link-item { transition: color 0.2s, transform 0.15s; }
         .nav-link-item:hover { transform: translateY(-1px); }
-        .nav-btn-icon {
-          transition: background 0.2s, transform 0.15s;
-        }
+        .nav-btn-icon { transition: background 0.2s, transform 0.15s; }
         .nav-btn-icon:hover { transform: scale(1.08); }
-        .nav-avatar-btn {
-          transition: box-shadow 0.2s, transform 0.15s;
-        }
+        .nav-avatar-btn { transition: box-shadow 0.2s, transform 0.15s; }
         .nav-avatar-btn:hover {
           box-shadow: 0 0 0 3px rgba(185,28,28,0.35);
           transform: scale(1.05);
         }
-        .nav-dropdown-item {
-          transition: background 0.15s, padding-left 0.15s;
-        }
+        .nav-dropdown-item { transition: background 0.15s, padding-left 0.15s; }
         .nav-dropdown-item:hover { padding-left: 20px !important; }
         .notif-item { transition: background 0.15s; }
         .join-btn { transition: background 0.2s, box-shadow 0.2s, transform 0.15s; }
@@ -111,9 +108,7 @@ export default function Navbar() {
       `}</style>
 
       <nav style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
+        position: "sticky", top: 0, zIndex: 100,
         borderBottom: dm ? "1px solid #1F2937" : "1px solid #F3F4F6",
         boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
         background: dm ? "#111827" : "#ffffff",
@@ -121,24 +116,15 @@ export default function Navbar() {
         fontFamily: "'DM Sans', sans-serif",
       }}>
         <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 40px",
-          height: 64,
-          gap: 24,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 40px", height: 64, position: "relative",
         }}>
 
           {/* ── Logo ── */}
           <Link to="/" style={{
-            fontFamily: "'Sora', sans-serif",
-            fontWeight: 800,
-            fontSize: 20,
-            color: dm ? "#F87171" : "#B91C1C",
-            textDecoration: "none",
-            letterSpacing: "-0.02em",
-            flexShrink: 0,
-            transition: "opacity 0.2s",
+            fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 20,
+            color: dm ? "#F87171" : "#B91C1C", textDecoration: "none",
+            letterSpacing: "-0.02em", flexShrink: 0, transition: "opacity 0.2s",
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -146,35 +132,27 @@ export default function Navbar() {
             ServFast
           </Link>
 
-          {/* ── Nav Links ── */}
-          <div style={{ display: "flex", gap: 28, alignItems: "center", flexShrink: 0 }}>
+          {/* ── Nav Links (centré) ── */}
+          <div style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            display: "flex", gap: 28, alignItems: "center",
+          }}>
             {navLinks.map(({ label, to }) => {
               const isActive = location.pathname.startsWith(to);
               return (
-                <Link
-                  key={to}
-                  to={to}
-                  className="nav-link-item"
-                  style={{
-                    fontSize: 14,
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#B91C1C" : dm ? "#D1D5DB" : "#6B7280",
-                    textDecoration: "none",
-                    position: "relative",
-                  }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "#B91C1C"; }}
-                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = dm ? "#D1D5DB" : "#6B7280"; }}
+                <Link key={to} to={to} className="nav-link-item" style={{
+                  fontSize: 14, fontWeight: isActive ? 700 : 500,
+                  color: isActive ? "#B91C1C" : dm ? "#D1D5DB" : "#6B7280",
+                  textDecoration: "none", position: "relative",
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "#B91C1C"; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = dm ? "#D1D5DB" : "#6B7280"; }}
                 >
                   {label}
                   {isActive && (
                     <span style={{
-                      position: "absolute",
-                      bottom: -4,
-                      left: 0,
-                      right: 0,
-                      height: 2,
-                      borderRadius: 2,
-                      background: "#B91C1C",
+                      position: "absolute", bottom: -4, left: 0, right: 0,
+                      height: 2, borderRadius: 2, background: "#B91C1C",
                     }} />
                   )}
                 </Link>
@@ -182,15 +160,11 @@ export default function Navbar() {
             })}
           </div>
 
-          <div style={{ flex: 1 }} />
-
           {/* ── Right Side ── */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0, marginLeft: "auto" }}>
 
-            {/* Dark mode toggle */}
-            <button
-              className="nav-btn-icon"
-              onClick={toggleDarkMode}
+            {/* Dark mode */}
+            <button className="nav-btn-icon" onClick={toggleDarkMode}
               title={dm ? "Switch to light mode" : "Switch to dark mode"}
               style={{
                 width: 38, height: 38, borderRadius: 10, border: "none",
@@ -206,8 +180,7 @@ export default function Navbar() {
             {/* Notifications */}
             {user && (
               <div style={{ position: "relative" }}>
-                <button
-                  className="nav-btn-icon"
+                <button className="nav-btn-icon"
                   onClick={() => { setShowNotifMenu(!showNotifMenu); setShowProfileMenu(false); }}
                   title="Notifications"
                   style={{
@@ -215,8 +188,7 @@ export default function Navbar() {
                     cursor: "pointer", fontSize: 16, display: "flex",
                     alignItems: "center", justifyContent: "center",
                     background: dm ? "#1F2937" : "#F3F4F6",
-                    color: dm ? "#D1D5DB" : "#4B5563",
-                    position: "relative",
+                    color: dm ? "#D1D5DB" : "#4B5563", position: "relative",
                   }}
                 >
                   🔔
@@ -272,9 +244,7 @@ export default function Navbar() {
                         ) : notifications.map(notif => {
                           const icon = notif.type === "PAYMENT" ? "💳" : notif.type === "BOOKING" ? "📅" : notif.type === "CONTACT" ? "💬" : "🔔";
                           return (
-                            <div
-                              key={notif.id}
-                              className="notif-item"
+                            <div key={notif.id} className="notif-item"
                               onClick={() => handleMarkAsRead(notif.id)}
                               style={{
                                 padding: "12px 16px", display: "flex", gap: 12,
@@ -318,8 +288,7 @@ export default function Navbar() {
             {/* Avatar / Auth buttons */}
             {user ? (
               <div style={{ position: "relative" }}>
-                <button
-                  className="nav-avatar-btn"
+                <button className="nav-avatar-btn"
                   onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifMenu(false); }}
                   style={{
                     width: 38, height: 38, borderRadius: "50%", border: "none",
@@ -333,9 +302,7 @@ export default function Navbar() {
                   {(() => {
                     const photoUrl = getImageUrl(user.profilePhoto || user.avatarUrl);
                     return photoUrl ? (
-                      <img
-                        src={photoUrl}
-                        alt="Profile"
+                      <img src={photoUrl} alt="Profile"
                         style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover" }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
@@ -382,9 +349,7 @@ export default function Navbar() {
                       </div>
 
                       {getDropdownItems().map(({ label, path }) => (
-                        <button
-                          key={path}
-                          className="nav-dropdown-item"
+                        <button key={path} className="nav-dropdown-item"
                           onClick={() => { navigate(path); setShowProfileMenu(false); }}
                           style={{
                             width: "100%", textAlign: "left", padding: "10px 16px",
@@ -397,8 +362,7 @@ export default function Navbar() {
                         </button>
                       ))}
 
-                      <button
-                        className="nav-dropdown-item"
+                      <button className="nav-dropdown-item"
                         onClick={() => { handleLogout(); setShowProfileMenu(false); }}
                         style={{
                           width: "100%", textAlign: "left", padding: "10px 16px",
@@ -417,21 +381,17 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  style={{
-                    fontSize: 14, fontWeight: 500,
-                    color: dm ? "#D1D5DB" : "#6B7280",
-                    textDecoration: "none", transition: "color 0.2s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = "#B91C1C"}
-                  onMouseLeave={e => e.currentTarget.style.color = dm ? "#D1D5DB" : "#6B7280"}
+                <Link to="/login" style={{
+                  fontSize: 14, fontWeight: 500,
+                  color: dm ? "#D1D5DB" : "#6B7280",
+                  textDecoration: "none", transition: "color 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = "#B91C1C"}
+                onMouseLeave={e => e.currentTarget.style.color = dm ? "#D1D5DB" : "#6B7280"}
                 >
                   Sign In
                 </Link>
-                <button
-                  className="join-btn"
-                  onClick={() => navigate("/register")}
+                <button className="join-btn" onClick={() => navigate("/register")}
                   style={{
                     fontSize: 14, fontWeight: 700, padding: "8px 20px",
                     borderRadius: 10, border: "none", cursor: "pointer",

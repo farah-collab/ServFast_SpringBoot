@@ -31,22 +31,18 @@ export default function ServiceDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
 
-  // Booking state
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
-  // Save state
   const [saved, setSaved] = useState(false);
   const [savedLoading, setSavedLoading] = useState(false);
 
-  // Review state — score initialisé à 5 par défaut
   const [reviewScore, setReviewScore] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  // ─── images ───────────────────────────────────────────────────────────────
   let images = [placeholderImage];
   if (service?.photoUrls?.length) {
     images = service.photoUrls.map(u => getImageUrl(u) ?? u);
@@ -54,11 +50,9 @@ export default function ServiceDetailPage() {
     images = [getImageUrl(service.imageUrl) ?? service.imageUrl];
   }
 
-  // ─── stats dérivées du service (recalculées à chaque reload) ──────────────
   const averageRating = service?.averageRating ?? 0;
   const totalRatings = service?.totalRatings ?? 0;
 
-  // ─── Chargement initial ───────────────────────────────────────────────────
   useEffect(() => {
     const loadService = async () => {
       if (!id) {
@@ -76,9 +70,7 @@ export default function ServiceDetailPage() {
         setService(data);
         setReviews(reviewsData);
       } catch {
-        setError(
-          "Impossible de charger les détails du service. Veuillez réessayer."
-        );
+        setError("Impossible de charger les détails du service. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
@@ -86,13 +78,11 @@ export default function ServiceDetailPage() {
     loadService();
   }, [id]);
 
-  // ─── Check saved status ───────────────────────────────────────────────────
   useEffect(() => {
     if (!user || !id) return;
     servicesApi.isSaved(Number(id)).then(setSaved).catch(() => {});
   }, [id, user]);
 
-  // ─── Rechargement des données après un rating ─────────────────────────────
   const reloadServiceAndReviews = async () => {
     if (!id) return;
     try {
@@ -100,14 +90,13 @@ export default function ServiceDetailPage() {
         servicesApi.getById(Number(id)),
         ratingsApi.getByService(Number(id)),
       ]);
-      setService(data);      // averageRating + totalRatings mis à jour ici
+      setService(data);
       setReviews(reviewsData);
     } catch {
-      // silencieux : les données actuelles restent affichées
+      // silencieux
     }
   };
 
-  // ─── Réserver le service ──────────────────────────────────────────────────
   const handleBookService = async () => {
     if (!user) { navigate("/login"); return; }
     if (!service) return;
@@ -123,7 +112,6 @@ export default function ServiceDetailPage() {
     }
   };
 
-  // ─── Enregistrer / désinscrire le service ────────────────────────────────
   const handleSaveToggle = async () => {
     if (!user) { navigate("/login"); return; }
     if (!service) return;
@@ -143,7 +131,6 @@ export default function ServiceDetailPage() {
     }
   };
 
-  // ─── Contacter le prestataire ─────────────────────────────────────────────
   const handleContactProvider = () => {
     if (!user) { navigate("/login"); return; }
     if (service?.provider?.id) {
@@ -157,25 +144,18 @@ export default function ServiceDetailPage() {
     }
   };
 
-  // ─── Soumettre un avis ────────────────────────────────────────────────────
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { navigate("/login"); return; }
     if (!service) return;
-
     setReviewError(null);
     try {
       setReviewLoading(true);
-      // Appel Spring Boot : POST /api/ratings  { serviceId, score, comment }
       await ratingsApi.submit(service.id, reviewScore, reviewComment);
-
-      // Reset du formulaire
       setReviewComment("");
       setReviewScore(5);
       setReviewSuccess(true);
       setTimeout(() => setReviewSuccess(false), 3000);
-
-      // Rechargement des données → les statistiques se recalculent automatiquement
       await reloadServiceAndReviews();
     } catch (err: any) {
       console.error("Erreur soumission avis:", err);
@@ -188,15 +168,13 @@ export default function ServiceDetailPage() {
     }
   };
 
-  // ─── Thème ────────────────────────────────────────────────────────────────
-  const bg      = dm ? "bg-gray-900"  : "bg-white";
-  const text     = dm ? "text-white"   : "text-gray-900";
-  const subtext  = dm ? "text-gray-400": "text-gray-500";
-  const border   = dm ? "border-gray-700" : "border-gray-100";
-  const boxBg    = dm ? "bg-gray-800" : "bg-gray-50";
-  const cardBg   = dm ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-100";
+  const bg     = dm ? "bg-gray-900"      : "bg-white";
+  const text   = dm ? "text-white"        : "text-gray-900";
+  const subtext = dm ? "text-gray-400"   : "text-gray-500";
+  const border  = dm ? "border-gray-700" : "border-gray-100";
+  const boxBg   = dm ? "bg-gray-800"     : "bg-gray-50";
+  const cardBg  = dm ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-100";
 
-  // ─── Rendu ────────────────────────────────────────────────────────────────
   return (
     <div
       className={`min-h-screen ${bg} flex flex-col transition-colors duration-300`}
@@ -209,9 +187,7 @@ export default function ServiceDetailPage() {
       <Navbar />
       <div className="max-w-6xl mx-auto w-full px-8 py-8 flex-1">
         {loading ? (
-          <div className={`text-center py-24 ${subtext}`}>
-            Chargement des détails…
-          </div>
+          <div className={`text-center py-24 ${subtext}`}>Chargement des détails…</div>
         ) : error ? (
           <div className="text-center py-24 text-red-600">{error}</div>
         ) : (
@@ -237,7 +213,6 @@ export default function ServiceDetailPage() {
               {/* ── COLONNE GAUCHE ── */}
               <div className="col-span-2">
 
-                {/* Titre */}
                 <h1
                   className={`text-2xl font-extrabold ${text} mb-3 leading-tight`}
                   style={{ fontFamily: "'Sora', sans-serif" }}
@@ -266,9 +241,7 @@ export default function ServiceDetailPage() {
                   </span>
                   <div className="flex items-center gap-1 text-yellow-400 text-sm">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star}>
-                        {star <= Math.round(averageRating) ? "★" : "☆"}
-                      </span>
+                      <span key={star}>{star <= Math.round(averageRating) ? "★" : "☆"}</span>
                     ))}
                   </div>
                   <span className={`text-sm ${subtext}`}>
@@ -302,15 +275,11 @@ export default function ServiceDetailPage() {
 
                 {/* Présentation du service */}
                 <div className="mb-8">
-                  <h2
-                    className={`text-lg font-bold ${text} mb-4`}
-                    style={{ fontFamily: "'Sora', sans-serif" }}
-                  >
+                  <h2 className={`text-lg font-bold ${text} mb-4`} style={{ fontFamily: "'Sora', sans-serif" }}>
                     Présentation du service
                   </h2>
                   <p className={`text-sm ${subtext} leading-relaxed mb-3`}>
-                    {service?.description ??
-                      "La description du service s'affichera ici une fois les données chargées."}
+                    {service?.description ?? "La description du service s'affichera ici une fois les données chargées."}
                   </p>
                   {service?.categoryName && (
                     <p className={`text-sm ${subtext} leading-relaxed mb-5`}>
@@ -333,10 +302,7 @@ export default function ServiceDetailPage() {
 
                 {/* À propos du prestataire */}
                 <div className={`${boxBg} rounded-2xl p-6 mb-8 border ${border}`}>
-                  <h2
-                    className={`text-lg font-bold ${text} mb-4`}
-                    style={{ fontFamily: "'Sora', sans-serif" }}
-                  >
+                  <h2 className={`text-lg font-bold ${text} mb-4`} style={{ fontFamily: "'Sora', sans-serif" }}>
                     À propos du prestataire
                   </h2>
                   <div className="flex items-start gap-4">
@@ -364,13 +330,9 @@ export default function ServiceDetailPage() {
                           : "Prestataire expérimenté avec un excellent historique"}
                       </div>
                       <p className={`text-sm ${subtext} leading-relaxed mb-3`}>
-                        Un service fiable axé sur la transparence et la satisfaction
-                        client à chaque commande.
+                        Un service fiable axé sur la transparence et la satisfaction client à chaque commande.
                       </p>
-                      <button
-                        type="button"
-                        className="text-sm text-red-700 font-semibold hover:underline"
-                      >
+                      <button type="button" className="text-sm text-red-700 font-semibold hover:underline">
                         Voir le portfolio →
                       </button>
                     </div>
@@ -379,20 +341,14 @@ export default function ServiceDetailPage() {
 
                 {/* Avis clients */}
                 <div className="mb-8">
-                  <h2
-                    className={`text-lg font-bold ${text} mb-6`}
-                    style={{ fontFamily: "'Sora', sans-serif" }}
-                  >
+                  <h2 className={`text-lg font-bold ${text} mb-6`} style={{ fontFamily: "'Sora', sans-serif" }}>
                     Avis clients
                   </h2>
 
-                  {/* Résumé des notes — recalculé automatiquement via service */}
+                  {/* Résumé des notes */}
                   <div className={`flex items-start gap-10 mb-8 p-6 ${boxBg} rounded-2xl border ${border}`}>
                     <div className="text-center">
-                      <div
-                        className={`text-5xl font-extrabold ${text} mb-1`}
-                        style={{ fontFamily: "'Sora', sans-serif" }}
-                      >
+                      <div className={`text-5xl font-extrabold ${text} mb-1`} style={{ fontFamily: "'Sora', sans-serif" }}>
                         {averageRating.toFixed(1)}
                       </div>
                       <div className="text-yellow-400 text-lg mb-1">★★★★★</div>
@@ -404,14 +360,10 @@ export default function ServiceDetailPage() {
                         return (
                           <div key={stars} className="flex items-center gap-3 mb-2">
                             <span className={`text-xs ${subtext} w-8`}>{stars} ★</span>
-                            <div
-                              className={`flex-1 ${dm ? "bg-gray-700" : "bg-gray-200"} rounded-full h-2`}
-                            >
+                            <div className={`flex-1 ${dm ? "bg-gray-700" : "bg-gray-200"} rounded-full h-2`}>
                               <div
                                 className="bg-red-700 h-2 rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${(count / (totalRatings || 1)) * 100}%`,
-                                }}
+                                style={{ width: `${(count / (totalRatings || 1)) * 100}%` }}
                               />
                             </div>
                             <span className={`text-xs ${subtext} w-6`}>{count}</span>
@@ -425,27 +377,29 @@ export default function ServiceDetailPage() {
                   <div className="space-y-4 mb-8">
                     <h3 className={`font-bold ${text} mb-4`}>Avis récents</h3>
                     {reviews.length === 0 ? (
-                      <p className={`text-sm ${subtext} italic`}>
-                        Aucun avis pour l'instant.
-                      </p>
+                      <p className={`text-sm ${subtext} italic`}>Aucun avis pour l'instant.</p>
                     ) : (
                       reviews.map((rev) => (
-                        <div
-                          key={rev.id}
-                          className={`p-5 rounded-2xl border ${border} ${boxBg} transition-all`}
-                        >
+                        <div key={rev.id} className={`p-5 rounded-2xl border ${border} ${boxBg} transition-all`}>
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
+                              {/* ── Avatar avis corrigé ── */}
                               <div className="w-9 h-9 rounded-full bg-red-700 flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0">
-                                {rev.userPhoto ? (
-                                  <img
-                                    src={rev.userPhoto}
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  rev.userName.slice(0, 2).toUpperCase()
-                                )}
+                                {(() => {
+                                  const photo = getImageUrl(rev.userPhoto);
+                                  return photo ? (
+                                    <img
+                                      src={photo}
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                      }}
+                                    />
+                                  ) : (
+                                    rev.userName.slice(0, 2).toUpperCase()
+                                  );
+                                })()}
                               </div>
                               <div>
                                 <span className={`block text-sm font-semibold ${text}`}>
@@ -458,16 +412,12 @@ export default function ServiceDetailPage() {
                             </div>
                             <div className="flex items-center gap-0.5 text-yellow-400 text-sm">
                               {[1, 2, 3, 4, 5].map((star) => (
-                                <span key={star}>
-                                  {star <= rev.score ? "★" : "☆"}
-                                </span>
+                                <span key={star}>{star <= rev.score ? "★" : "☆"}</span>
                               ))}
                             </div>
                           </div>
                           {rev.comment && (
-                            <p
-                              className={`text-sm ${dm ? "text-gray-300" : "text-gray-700"} leading-relaxed`}
-                            >
+                            <p className={`text-sm ${dm ? "text-gray-300" : "text-gray-700"} leading-relaxed`}>
                               {rev.comment}
                             </p>
                           )}
@@ -476,78 +426,59 @@ export default function ServiceDetailPage() {
                     )}
                   </div>
 
-                  {/* Formulaire d'avis — uniquement si l'utilisateur n'est pas le prestataire */}
-                  {user &&
-                    service?.provider?.id &&
-                    user.id !== service.provider.id && (
-                      <div
-                        className={`${cardBg} p-6 rounded-2xl border ${border}`}
-                        style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.04)" }}
-                      >
-                        <h3 className={`font-bold ${text} mb-4`}>
-                          Laisser un avis
-                        </h3>
-                        <form onSubmit={handleSubmitReview}>
-                          {/* Sélection des étoiles */}
-                          <div className="flex gap-2 mb-4">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => setReviewScore(star)}
-                                className={`text-2xl transition-colors ${
-                                  star <= reviewScore
-                                    ? "text-yellow-400"
-                                    : dm
-                                    ? "text-gray-600"
-                                    : "text-gray-200"
-                                }`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                            <span className={`ml-2 text-sm self-center ${subtext}`}>
-                              {reviewScore}/5
-                            </span>
-                          </div>
-
-                          {/* Commentaire */}
-                          <textarea
-                            value={reviewComment}
-                            onChange={(e) => setReviewComment(e.target.value)}
-                            placeholder="Partagez votre expérience avec ce service…"
-                            required
-                            rows={3}
-                            className={`w-full border rounded-xl p-3 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 ${
-                              dm
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:bg-gray-600"
-                                : "bg-white border-gray-200 text-gray-900"
-                            }`}
-                          />
-
-                          {/* Bouton + messages */}
-                          <div className="flex items-center gap-4 flex-wrap">
+                  {/* Formulaire d'avis */}
+                  {user && service?.provider?.id && user.id !== service.provider.id && (
+                    <div
+                      className={`${cardBg} p-6 rounded-2xl border ${border}`}
+                      style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.04)" }}
+                    >
+                      <h3 className={`font-bold ${text} mb-4`}>Laisser un avis</h3>
+                      <form onSubmit={handleSubmitReview}>
+                        <div className="flex gap-2 mb-4">
+                          {[1, 2, 3, 4, 5].map((star) => (
                             <button
-                              type="submit"
-                              disabled={reviewLoading}
-                              className="bg-red-700 hover:bg-red-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewScore(star)}
+                              className={`text-2xl transition-colors ${
+                                star <= reviewScore ? "text-yellow-400" : dm ? "text-gray-600" : "text-gray-200"
+                              }`}
                             >
-                              {reviewLoading ? "Envoi en cours…" : "Soumettre l'avis"}
+                              ★
                             </button>
-                            {reviewSuccess && (
-                              <span className="text-sm text-green-600 font-medium">
-                                ✓ Avis soumis avec succès !
-                              </span>
-                            )}
-                            {reviewError && (
-                              <span className="text-sm text-red-600">
-                                {reviewError}
-                              </span>
-                            )}
-                          </div>
-                        </form>
-                      </div>
-                    )}
+                          ))}
+                          <span className={`ml-2 text-sm self-center ${subtext}`}>{reviewScore}/5</span>
+                        </div>
+                        <textarea
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          placeholder="Partagez votre expérience avec ce service…"
+                          required
+                          rows={3}
+                          className={`w-full border rounded-xl p-3 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                            dm
+                              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:bg-gray-600"
+                              : "bg-white border-gray-200 text-gray-900"
+                          }`}
+                        />
+                        <div className="flex items-center gap-4 flex-wrap">
+                          <button
+                            type="submit"
+                            disabled={reviewLoading}
+                            className="bg-red-700 hover:bg-red-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
+                          >
+                            {reviewLoading ? "Envoi en cours…" : "Soumettre l'avis"}
+                          </button>
+                          {reviewSuccess && (
+                            <span className="text-sm text-green-600 font-medium">✓ Avis soumis avec succès !</span>
+                          )}
+                          {reviewError && (
+                            <span className="text-sm text-red-600">{reviewError}</span>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -560,18 +491,14 @@ export default function ServiceDetailPage() {
                   >
                     <div className="flex justify-between items-center mb-5">
                       <div>
-                        <div className={`text-xs font-bold uppercase tracking-wide ${subtext}`}>
-                          Prestataire
-                        </div>
+                        <div className={`text-xs font-bold uppercase tracking-wide ${subtext}`}>Prestataire</div>
                         <div className={`text-lg font-semibold ${text}`}>
                           {service?.provider?.fullName ?? "Inconnu"}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className={subtext}>Note</div>
-                        <div className={`text-base font-bold ${text}`}>
-                          {averageRating.toFixed(1)} ★
-                        </div>
+                        <div className={`text-base font-bold ${text}`}>{averageRating.toFixed(1)} ★</div>
                       </div>
                     </div>
                     <div className={`space-y-3 mb-6 text-sm ${subtext}`}>
@@ -605,14 +532,8 @@ export default function ServiceDetailPage() {
                           : "border-gray-200 hover:border-red-700 text-gray-700 hover:text-red-700"
                       } disabled:opacity-70`}
                     >
-                      {bookingLoading
-                        ? "Réservation…"
-                        : bookingSuccess
-                        ? "Réservé avec succès !"
-                        : "Réserver ce service"}
+                      {bookingLoading ? "Réservation…" : bookingSuccess ? "Réservé avec succès !" : "Réserver ce service"}
                     </button>
-
-                    {/* ── Save / Unsave button ── */}
                     <button
                       onClick={handleSaveToggle}
                       disabled={savedLoading}
@@ -627,11 +548,7 @@ export default function ServiceDetailPage() {
                       } disabled:opacity-50`}
                     >
                       <span>{saved ? '🔖' : '🏷️'}</span>
-                      {savedLoading
-                        ? "..."
-                        : saved
-                        ? "Enregistré"
-                        : "Enregistrer ce service"}
+                      {savedLoading ? "..." : saved ? "Enregistré" : "Enregistrer ce service"}
                     </button>
                   </div>
                 </div>
@@ -641,7 +558,6 @@ export default function ServiceDetailPage() {
           </>
         )}
       </div>
-
       <Footer />
     </div>
   );

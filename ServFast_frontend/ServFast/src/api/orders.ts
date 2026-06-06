@@ -36,4 +36,15 @@ export const ordersApi = {
     const res = await api.patch(`/orders/${orderId}/status?status=${status}`);
     return res.data;
   },
+
+  // ── Raccourcis utilisant updateStatus ──
+  accept: async (orderId: number): Promise<Order> => {
+    const res = await api.patch(`/orders/${orderId}/status?status=ACCEPTED`);
+    return res.data;
+  },
+
+  reject: async (orderId: number): Promise<Order> => {
+    const res = await api.patch(`/orders/${orderId}/status?status=REJECTED`);
+    return res.data;
+  },
 };

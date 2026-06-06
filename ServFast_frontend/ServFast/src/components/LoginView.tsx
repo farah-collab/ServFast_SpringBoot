@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authApi } from "../api/auth";
 import { useTheme } from "../context/ThemeContext";
+import { useUser } from "../context/UserContext";
 
 export function LoginView() {
   const navigate = useNavigate();
   const location = useLocation();
   const { darkMode: dm } = useTheme();
+  const { refreshUser } = useUser();
   const redirectFrom = (location.state as { from?: { pathname?: string } })?.from?.pathname;
   const isExpired = new URLSearchParams(location.search).get('expired') === 'true';
   const [email, setEmail] = useState("");
@@ -21,6 +23,7 @@ export function LoginView() {
     setLoading(true);
     try {
       await authApi.login({ email, password });
+      refreshUser(); // ← charge le nouveau user dans le context
       navigate(redirectFrom || "/", { replace: true });
     } catch (err: any) {
       const msg = err.response?.data?.message;
@@ -52,19 +55,13 @@ export function LoginView() {
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-red-800 rounded-full opacity-40 translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10">
-          <span
-            className="text-white text-2xl font-extrabold tracking-tight"
-            style={{ fontFamily: "'Sora', sans-serif" }}
-          >
+          <span className="text-white text-2xl font-extrabold tracking-tight" style={{ fontFamily: "'Sora', sans-serif" }}>
             ServFast
           </span>
         </div>
 
         <div className="relative z-10">
-          <h2
-            className="text-white text-4xl font-extrabold leading-tight mb-6"
-            style={{ fontFamily: "'Sora', sans-serif" }}
-          >
+          <h2 className="text-white text-4xl font-extrabold leading-tight mb-6" style={{ fontFamily: "'Sora', sans-serif" }}>
             Connect with the world's best professionals
           </h2>
           <p className="text-red-100 text-base leading-relaxed mb-10">
@@ -98,6 +95,7 @@ export function LoginView() {
           </div>
         </div>
       </div>
+
       {/* ── RIGHT PANEL ── */}
       <div className={`flex-1 flex items-center justify-center px-8 py-12 transition-colors duration-300 ${dm ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="w-full max-w-md">
@@ -115,7 +113,6 @@ export function LoginView() {
             <p className="text-gray-400 text-sm">Sign in to your account to continue</p>
           </div>
 
-          {/* Error Banner */}
           {isExpired && (
             <div className="mb-5 px-4 py-3 bg-orange-50 border border-orange-200 rounded-xl text-sm text-orange-700 font-medium flex items-center gap-2">
               <span>⚠️</span> Session expired. Please sign in again.
@@ -133,7 +130,6 @@ export function LoginView() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
             <div>
               <label className={`block text-sm font-semibold mb-2 ${dm ? 'text-gray-300' : 'text-gray-700'}`}>Email address</label>
               <input
@@ -148,7 +144,6 @@ export function LoginView() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className={`text-sm font-semibold ${dm ? 'text-gray-300' : 'text-gray-700'}`}>Password</label>
@@ -181,13 +176,13 @@ export function LoginView() {
               </div>
             </div>
 
-            {/* Remember me */}
             <div className="flex items-center gap-2">
               <input type="checkbox" id="remember" className="w-4 h-4 accent-red-700 cursor-pointer" />
-              <label htmlFor="remember" className={`text-sm cursor-pointer ${dm ? 'text-gray-400' : 'text-gray-550'}`}>Remember me for 30 days</label>
+              <label htmlFor="remember" className={`text-sm cursor-pointer ${dm ? 'text-gray-400' : 'text-gray-550'}`}>
+                Remember me for 30 days
+              </label>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
